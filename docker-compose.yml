@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  pihole:
+    container_name: dns-updater
+    image: dungtri/docker-cloudflare-dns-updater
+    environment:
+      - DNS_UPDATER_EMAIL='<cloudflare email used for registration>',
+      - DNS_UPDATER_KEY='<cloudflare api key>',
+      - DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>'
+    restart: unless-stopped
