@@ -4,7 +4,7 @@ A tiny background docker containerized process which automatically check your pu
 
 - It has been only tested and run on raspberry pi 2 & 3.
 - It make a GET request to http://ipv4bot.whatismyipaddress.com to retrieve the public ip address.
-- It connect & update your dns zone only when the IP change on cloudflare.
+- It connect & update your dns zone on cloudflare only when the IP change.
 
 ## Getting Started
 
@@ -34,6 +34,8 @@ services:
       - DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>'
     restart: unless-stopped
 ```
+
+The docker package are available on Docker Hub here: https://hub.docker.com/r/dungtri/docker-cloudflare-dns-updater
 
 ## Optional environment variable
 
