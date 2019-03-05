@@ -1,87 +1,58 @@
-# Project Title
+# DNS Updater
 
-One Paragraph of project description goes here
+A tiny background docker containerized process which automatically check your public ip and update the dns zone on the Cloudflare platform.
+
+- It has been only tested and run on raspberry pi 2 & 3.
+- It make a GET request to http://ipv4bot.whatismyipaddress.com to retrieve the public ip address.
+- It connect & update your dns zone on cloudflare only when the IP change.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-What things you need to install the software and how to install them
+Docker run command :
 
 ```
-Give examples
+docker run --name dns-updater \
+--restart unless-stopped \
+-e DNS_UPDATER_EMAIL='<cloudflare email used for registration>' \
+-e DNS_UPDATER_KEY='<cloudflare api key>' \
+-e DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>' \
+dungtri/docker-cloudflare-dns-updater
 ```
 
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Docker compose :
 
 ```
-Give the example
+version: "3"
+
+services:
+  pihole:
+    container_name: dns-updater
+    image: dungtri/docker-cloudflare-dns-updater
+    environment:
+      - DNS_UPDATER_EMAIL='<cloudflare email used for registration>',
+      - DNS_UPDATER_KEY='<cloudflare api key>',
+      - DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>'
+    restart: unless-stopped
 ```
 
-And repeat
+The docker package are available on Docker Hub here: https://hub.docker.com/r/dungtri/docker-cloudflare-dns-updater
 
-```
-until finished
-```
+## Optional environment variable
 
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* `SCHEDULER_CHECK_DELAY` Each time in millisecond, your current public internet protocol address is checked (default: 30000ms).
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/dungtri/docker-cloudflare-dns-updater/tags). 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **Dung Tri LE** - *Initial work* - [dungtri](https://github.com/dungtri)
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
