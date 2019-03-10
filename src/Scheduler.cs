@@ -1,7 +1,6 @@
 ﻿using DNSUpdater.Features.GetIP;
 using DNSUpdater.Features.UpdateDNS;
 using DNSUpdater.Http;
-using DNSUpdater.Settings;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,21 +22,21 @@ namespace DNSUpdater
 
         private readonly IMediator mediator;
         private readonly ILogger<Scheduler> logger;
-        private readonly IEnvironmentVariable environmentVariable;
+        private readonly SchedulerSettings settings;
 
         public Scheduler(
             IMediator mediator,
             ILogger<Scheduler> logger,
-            IEnvironmentVariable environmentVariable)
+            SchedulerSettings settings)
         {
             this.mediator = mediator;
             this.logger = logger;
-            this.environmentVariable = environmentVariable;
+            this.settings = settings;
         }
 
         public async Task Start(CancellationToken cancellationToken = default)
         {
-            var checkDelayStr = environmentVariable.Get(EnvironmentVariables.SCHEDULER_CHECK_DELAY);
+            var checkDelayStr = settings.CheckDelay;
             if (!int.TryParse(checkDelayStr, out int delay))
             {
                 delay = CHECK_DELAY_DEFAULT;
@@ -62,14 +61,6 @@ namespace DNSUpdater
                 {
                     logger.LogError(apiException, $"The request return the status code '{apiException.StatusCode}' - '{apiException.Content}'");
                 }
-                catch (EnvironmentVariableRequiredException envVarRequiredException)
-                {
-                    if (logger.IsEnabled(LogLevel.Error))
-                    {
-                        LogEnvironmentVariableRequiredMessage(envVarRequiredException);
-                    }
-                    break;
-                }
                 catch (IPBadFormatException ipException)
                 {
                     logger.LogError(ipException, "Without a valid IP address, DNS entries cannot be updated.");
@@ -84,15 +75,6 @@ namespace DNSUpdater
                 logger.LogInformation($"Wait {delay / 1000} seconds before the next check");
                 await Task.Delay(delay, cancellationToken);
             }
-        }
-
-        private void LogEnvironmentVariableRequiredMessage(EnvironmentVariableRequiredException envVarRequiredException)
-        {
-            var builder = new StringBuilder()
-                .AppendLine("All environment variables marked as required has to be provide:");
-            envVarRequiredException.RequiredKeys.Select(key => builder.AppendLine($" - {key}")).ToArray();
-            builder.AppendLine("For more information, type dns-updater --help");
-            logger.LogError(builder.ToString());
         }
     }
 }

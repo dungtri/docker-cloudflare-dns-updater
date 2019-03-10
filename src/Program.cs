@@ -1,4 +1,7 @@
-﻿using DNSUpdater.Settings;
+﻿using DNSUpdater.Extensions;
+using DNSUpdater.Features;
+using DNSUpdater.Features.UpdateDNS;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +28,7 @@ namespace DNSUpdater
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
             var logger = serviceProvider.GetService<ILogger<Program>>();
-            logger.LogInformation("DNSUpdater started.");
+            logger.LogInformation("dns-updater started.");
 
             var schedule = serviceProvider.GetService<IScheduler>();
             var cancellationTokenSource = new CancellationTokenSource();
@@ -40,8 +43,28 @@ namespace DNSUpdater
                 logger.LogInformation("Process exit detected. Cancel all tasks...");
                 cancellationTokenSource.Cancel();
             };
+
+            ValidateSettings(serviceProvider, logger);
+
             await schedule.Start(cancellationTokenSource.Token);
-            logger.LogInformation("DNSUpdater closed.");
+            logger.LogInformation("dns-updater closed.");
+        }
+
+        private static void ValidateSettings(ServiceProvider serviceProvider, ILogger<Program> logger)
+        {
+            var updateDNSSettings = serviceProvider.GetRequiredService<UpdateDNSSettings>();
+            var updateDNSValidator = serviceProvider.GetRequiredService<IValidator<UpdateDNSSettings>>();
+            var updateDNSValidation = updateDNSValidator.Validate(updateDNSSettings);
+            if (!updateDNSValidation.IsValid)
+            {
+                foreach (var error in updateDNSValidation.Errors)
+                {
+                    logger.LogError(error.ErrorMessage);
+                }
+
+                logger.LogInformation("All environment variables marked as required has to be provide.");
+                logger.LogInformation("For more information, type dns-updater --help");
+            }
         }
 
         private static void ConfigureServices(IServiceCollection serviceCollection)
@@ -52,8 +75,9 @@ namespace DNSUpdater
                     .AddDebug()
                 )
                 .AddMediatR()
-                .AddTransient<IEnvironmentVariable, EnvironmentVariable>()
-                .AddTransient<IScheduler, Scheduler>();
+                .AddEnvironmentSettings()
+                .AddTransient<IScheduler, Scheduler>()
+                .AddFluentValidation();
         }
     }
 }
