@@ -1,7 +1,6 @@
 ﻿using DNSUpdater.Entities;
 using DNSUpdater.Features.UpdateDNS;
 using DNSUpdater.Http;
-using DNSUpdater.Settings;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -13,39 +12,32 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DNSUpdater
+namespace DNSUpdater.Features
 {
     public class UpdateDNSHandler : IRequestHandler<UpdateDNSRequest, UpdateDNSResponse>
     {
         public static readonly string baseUrl = "https://api.cloudflare.com/client/v4/";
-        private readonly IEnvironmentVariable environmentVariable;
         private readonly ILogger<UpdateDNSHandler> _logger;
+        private readonly UpdateDNSSettings settings;
 
-        public UpdateDNSHandler(IEnvironmentVariable environmentVariable, ILogger<UpdateDNSHandler> logger)
+        public UpdateDNSHandler(ILogger<UpdateDNSHandler> logger, UpdateDNSSettings settings)
         {
-            this.environmentVariable = environmentVariable;
             _logger = logger;
+            this.settings = settings;
         }
 
         public async Task<UpdateDNSResponse> Handle(UpdateDNSRequest request, CancellationToken cancellationToken)
         {
-            var variables = environmentVariable.GetRequired
-            (
-                EnvironmentVariables.DNS_UPDATER_EMAIL,
-                EnvironmentVariables.DNS_UPDATER_KEY,
-                EnvironmentVariables.DNS_UPDATER_ZONE
-            );
-
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Add("X-Auth-Email", new[] {
-                    variables[EnvironmentVariables.DNS_UPDATER_EMAIL]
+                    settings.Email
                 });
                 client.DefaultRequestHeaders.Add("X-Auth-Key", new[] {
-                    variables[EnvironmentVariables.DNS_UPDATER_KEY]
+                    settings.Key ?? GetSecret(settings.KeyFile)
                 });
 
-                var zone = variables[EnvironmentVariables.DNS_UPDATER_ZONE];
+                var zone = settings.Zone ?? GetSecret(settings.ZoneFile);
                 var url = $"{baseUrl}/zones/{zone}/dns_records?type=A";
                 using (var httpRequest = new HttpRequestMessage(HttpMethod.Get, url))
                 using (var response = await client.SendAsync(httpRequest, cancellationToken))
@@ -67,6 +59,11 @@ namespace DNSUpdater
                     };
                 }
             }
+        }
+
+        private static string GetSecret(string filename)
+        {
+            return File.ReadAllText(filename);
         }
 
         private static T DeserializeJsonFromStream<T>(Stream stream)
