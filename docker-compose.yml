@@ -1,13 +1,28 @@
-version: "3"
+version: "3.1"
 
 services:
-  pihole:
+  dnsupdater:
     container_name: dns-updater
     image: dungtri/docker-cloudflare-dns-updater
     environment:
-      - DNS_UPDATER_EMAIL='<cloudflare email used for registration>',
-      - DNS_UPDATER_KEY='<cloudflare api key>',
-      - DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>'
+      DNS_UPDATER_EMAIL: dungtri.le.consultant@outlook.com
+      DNS_UPDATER_KEY_FILE: /run/secrets/dns_updater_key
+      DNS_UPDATER_ZONE_FILE: /run/secrets/dns_updater_zone
+    
+    # More simple but less secure if you prefer to set the key & the zone directly 
+    # as text plain, you can use these environment variables:
+    # DNS_UPDATER_KEY: <token>
+    # DNS_UPDATER_ZONE: <token>
+    
     # (Optional) Delay between checks current ip & update when necessary (default: 30000).
-    # - SCHEDULER_CHECK_DELAY=<custom delay>
-    restart: unless-stopped
+    # SCHEDULER_CHECK_DELAY: <custom delay>
+
+    secrets:
+      - dns_updater_key
+      - dns_updater_zone
+
+secrets:
+  dns_updater_key:
+    external: true
+  dns_updater_zone:
+    external: true
