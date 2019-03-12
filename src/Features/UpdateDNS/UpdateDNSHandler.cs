@@ -91,6 +91,7 @@ namespace DNSUpdater.Features
             {
                 if (record.Content != ip)
                 {
+                    _logger.LogInformation($"Update {record.Name} - {record.Type} '{record.Content}' to the new IP '{ip}'");
                     var url = $"{baseUrl}/zones/{zone}/dns_records/{record.Id}";
                     var json = JsonConvert.SerializeObject(new DNSRecord()
                     {
