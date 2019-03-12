@@ -3,7 +3,7 @@
 
     public class SchedulerSettings
     {
-        public static readonly string SCHEDULER_CHECK_DELAY = "CHECK_DELAY";
+        public static readonly string SCHEDULER_CHECK_DELAY = "SCHEDULER_CHECK_DELAY";
 
         public string CheckDelay { get; set; }
     }
