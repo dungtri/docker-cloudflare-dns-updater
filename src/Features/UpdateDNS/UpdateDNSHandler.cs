@@ -34,10 +34,10 @@ namespace DNSUpdater.Features
                     settings.Email
                 });
                 client.DefaultRequestHeaders.Add("X-Auth-Key", new[] {
-                    settings.Key
+                    settings.Key ?? GetSecret(settings.KeyFile)
                 });
 
-                var zone = settings.Zone;
+                var zone = settings.Zone ?? GetSecret(settings.ZoneFile);
                 var url = $"{baseUrl}/zones/{zone}/dns_records?type=A";
                 using (var httpRequest = new HttpRequestMessage(HttpMethod.Get, url))
                 using (var response = await client.SendAsync(httpRequest, cancellationToken))
@@ -59,6 +59,11 @@ namespace DNSUpdater.Features
                     };
                 }
             }
+        }
+
+        private static string GetSecret(string filename)
+        {
+            return File.ReadAllText(filename);
         }
 
         private static T DeserializeJsonFromStream<T>(Stream stream)
