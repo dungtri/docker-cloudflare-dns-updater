@@ -2,7 +2,7 @@
 
 A tiny background docker containerized process which automatically check your public ip and update the dns zone on the Cloudflare platform.
 
-- It has been only tested and run on raspberry pi 2 & 3.
+- It has been only tested and run on Raspberry PI 2 & 3.
 - It make a GET request to http://ipv4bot.whatismyipaddress.com to retrieve the public ip address.
 - It connect & update your dns zone on cloudflare only when the IP change.
 
