@@ -10,6 +10,7 @@ A tiny background docker containerized process which automatically check your pu
 
 Docker Create Service Command :
 
+```
 docker service create \
      --name dns-updater \
      --replicas 1 \
@@ -19,6 +20,7 @@ docker service create \
      -e DNS_UPDATER_KEY_FILE="/run/secrets/dns_updater_key" \
      -e DNS_UPDATER_ZONE_FILE="/run/secrets/dns_updater_zone" \
      dungtri/docker-cloudflare-dns-updater:arm32
+```
 
 Docker Compose File :
 
