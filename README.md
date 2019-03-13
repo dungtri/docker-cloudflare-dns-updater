@@ -32,7 +32,7 @@ services:
     container_name: dns-updater
     image: dungtri/docker-cloudflare-dns-updater
     environment:
-      DNS_UPDATER_EMAIL: yourmail@me.com
+      DNS_UPDATER_EMAIL: mycloudflareaccount@me.com
       DNS_UPDATER_KEY_FILE: /run/secrets/dns_updater_key
       DNS_UPDATER_ZONE_FILE: /run/secrets/dns_updater_zone
     
