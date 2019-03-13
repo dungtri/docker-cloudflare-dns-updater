@@ -57,7 +57,9 @@ secrets:
 
 Deploying the Service :
 
+```
 docker stack deploy -c dns-updater-arm32.yml dns-updater
+```
 
 The docker package are available on Docker Hub here: https://hub.docker.com/r/dungtri/docker-cloudflare-dns-updater
 
