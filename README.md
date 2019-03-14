@@ -2,37 +2,63 @@
 
 A tiny background docker containerized process which automatically check your public ip and update the dns zone on the Cloudflare platform.
 
-- It has been only tested and run on raspberry pi 2 & 3.
+- It has been only tested and run on Raspberry PI 2 & 3.
 - It make a GET request to http://ipv4bot.whatismyipaddress.com to retrieve the public ip address.
 - It connect & update your dns zone on cloudflare only when the IP change.
 
 ## Getting Started
 
-Docker run command :
+Docker Create Service Command :
 
 ```
-docker run --name dns-updater \
---restart unless-stopped \
--e DNS_UPDATER_EMAIL='<cloudflare email used for registration>' \
--e DNS_UPDATER_KEY='<cloudflare api key>' \
--e DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>' \
-dungtri/docker-cloudflare-dns-updater
+docker service create \
+     --name dns-updater \
+     --replicas 1 \
+     --secret source=dns_updater_key,target=dns_updater_key \
+     --secret source=dns_updater_zone,target=dns_updater_zone \
+     -e DNS_UPDATER_EMAIL="mycloudflareaccount@me.com" \
+     -e DNS_UPDATER_KEY_FILE="/run/secrets/dns_updater_key" \
+     -e DNS_UPDATER_ZONE_FILE="/run/secrets/dns_updater_zone" \
+     dungtri/docker-cloudflare-dns-updater:arm32
 ```
 
-Docker compose :
+Docker Compose File :
 
 ```
-version: "3"
+version: "3.1"
 
 services:
-  pihole:
+  dnsupdater:
     container_name: dns-updater
     image: dungtri/docker-cloudflare-dns-updater
     environment:
-      - DNS_UPDATER_EMAIL='<cloudflare email used for registration>',
-      - DNS_UPDATER_KEY='<cloudflare api key>',
-      - DNS_UPDATER_ZONE='<cloudflare dns zoneId to update>'
-    restart: unless-stopped
+      DNS_UPDATER_EMAIL: mycloudflareaccount@me.com
+      DNS_UPDATER_KEY_FILE: /run/secrets/dns_updater_key
+      DNS_UPDATER_ZONE_FILE: /run/secrets/dns_updater_zone
+    
+    # More simple but less secure if you prefer to set the key & the zone directly 
+    # as text plain, you can use these environment variables:
+    # DNS_UPDATER_KEY: <token>
+    # DNS_UPDATER_ZONE: <token>
+    
+    # (Optional) Delay between checks current ip & update when necessary (default: 30000).
+    # SCHEDULER_CHECK_DELAY: <custom delay>
+
+    secrets:
+      - dns_updater_key
+      - dns_updater_zone
+
+secrets:
+  dns_updater_key:
+    external: true
+  dns_updater_zone:
+    external: true
+```
+
+Deploying the Service :
+
+```
+docker stack deploy -c dns-updater-arm32.yml dns-updater
 ```
 
 The docker package are available on Docker Hub here: https://hub.docker.com/r/dungtri/docker-cloudflare-dns-updater

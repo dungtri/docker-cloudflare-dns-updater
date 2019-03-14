@@ -1,1 +1,1 @@
-docker build --rm -t docker-cloudflare-dns-updater .
+docker build --rm -t dungtri/docker-cloudflare-dns-updater .
