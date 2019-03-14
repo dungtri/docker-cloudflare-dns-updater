@@ -1,5 +1,10 @@
 # DNS Updater
 
+![GitHub release](https://img.shields.io/github/release/dungtri/docker-cloudflare-dns-updater.svg)
+![GitHub](https://img.shields.io/github/license/dungtri/docker-cloudflare-dns-updater.svg)
+![GitHub Releases](https://img.shields.io/github/downloads/dungtri/docker-cloudflare-dns-updater/v1.0.0/total.svg)
+
+
 A tiny background docker containerized process which automatically check your public ip and update the dns zone on the Cloudflare platform.
 
 - It has been only tested and run on Raspberry PI 2 & 3.
