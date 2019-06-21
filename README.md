@@ -52,7 +52,6 @@ services:
       - dns_updater_key
       - dns_updater_zone
     deploy:
-      mode: global
       placement:
         constraints:
           - node.platform.arch == armv7l
