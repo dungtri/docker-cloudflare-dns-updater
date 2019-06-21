@@ -26,7 +26,7 @@ docker service create \
      dungtri/docker-cloudflare-dns-updater:arm32
 ```
 
-Docker Compose File :
+Docker Compose File (SWARM) :
 
 ```
 version: "3.1"
@@ -51,6 +51,11 @@ services:
     secrets:
       - dns_updater_key
       - dns_updater_zone
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.platform.arch == armv7l
 
 secrets:
   dns_updater_key:
